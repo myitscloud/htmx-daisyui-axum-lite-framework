@@ -2,6 +2,8 @@
 
 ![Screenshot](demopicture.png)
 
+> Original inspiration from [uksarkar/htmx](https://github.com/uksarkar/htmx) by Utpal Sarkar. This fork replaces Handlebars with Tera, swaps Milligram for DaisyUI/Tailwind CSS, and reworks the demo pages around live GitHub API data.
+
 A full-featured single-page application demo using **HTMX** with Rust's **Axum** framework, **Tera** templating, **DaisyUI** components, and **Tailwind CSS**.
 
 Instead of a heavy JavaScript framework (React, Vue, etc.), HTMX handles all dynamic page updates via HTML-fragment swaps over HTTP. The server controls both rendering and navigation through a custom middleware layer.
