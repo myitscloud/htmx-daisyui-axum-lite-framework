@@ -1,5 +1,7 @@
 # HTMX Demo — Axum + DaisyUI + GitHub API
 
+![Screenshot](demopicture.png)
+
 A full-featured single-page application demo using **HTMX** with Rust's **Axum** framework, **Tera** templating, **DaisyUI** components, and **Tailwind CSS**.
 
 Instead of a heavy JavaScript framework (React, Vue, etc.), HTMX handles all dynamic page updates via HTML-fragment swaps over HTTP. The server controls both rendering and navigation through a custom middleware layer.
