@@ -1,45 +1,61 @@
-use std::sync::Arc;
+use std::{fs, sync::{Arc, Mutex}, time::Instant};
 
-use axum::{middleware::from_fn, Extension, Router};
-use db::User;
-use fake::{Fake, Faker};
+use axum::{middleware::from_fn, Extension};
 use response::response_middleware;
 use routes::routes;
+use serde_json::Value;
 
-mod db;
 mod response;
 mod routes;
-mod pagination;
+
+pub struct GithubCache {
+    pub repos: Vec<Value>,
+    pub repos_fetched: Instant,
+    pub starred: Vec<Value>,
+    pub starred_fetched: Instant,
+    pub trending: Vec<Value>,
+    pub trending_fetched: Instant,
+    pub forked: Vec<Value>,
+    pub forked_fetched: Instant,
+}
 
 pub struct AppState {
-    h: handlebars::Handlebars<'static>,
-    db: Vec<User>,
+    pub h: tera::Tera,
+    pub github_cache: Mutex<GithubCache>,
 }
 
 pub type ExtAppState = Arc<AppState>;
 
 #[tokio::main]
 async fn main() {
-    let mut h = handlebars::Handlebars::new();
+    let mut h = tera::Tera::new();
 
-    // register templates
-    h.register_template_file("index", "templates/index.hbs")
-        .expect("Unable to register template");
-    h.register_template_file("user.list", "templates/user/list.hbs")
-        .expect("Unable to register template");
-    h.register_template_file("user.view", "templates/user/view.hbs")
-        .expect("Unable to register template");
-    h.register_template_file("404", "templates/404.hbs")
-        .expect("Unable to register template");
-    h.register_template_file("about", "templates/about.hbs")
-        .expect("Unable to register template");
+    for (name, path) in [
+        ("index", "templates/index.html"),
+        ("about", "templates/about.html"),
+        ("404", "templates/404.html"),
+        ("github", "templates/github.html"),
+        ("welcome", "templates/welcome.html"),
+    ] {
+        h.add_raw_template(name, &fs::read_to_string(path).expect("Unable to read template"))
+            .expect("Unable to register template");
+    }
 
-    // initialize db
-    let db: Vec<User> = (0..100).map(|_| Faker.fake::<User>()).collect();
+    let state = Arc::new(AppState {
+        h,
+        github_cache: Mutex::new(GithubCache {
+            repos: vec![],
+            repos_fetched: Instant::now(),
+            starred: vec![],
+            starred_fetched: Instant::now(),
+            trending: vec![],
+            trending_fetched: Instant::now(),
+            forked: vec![],
+            forked_fetched: Instant::now(),
+        }),
+    });
 
-    let state = Arc::new(AppState { h, db });
-
-    let app = Router::from(routes())
+    let app = routes()
         .layer(from_fn(response_middleware))
         .layer(Extension(state));
 

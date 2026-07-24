@@ -1,0 +1,36 @@
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold">{{ title }}</h2>
+    <button hx-get="{{ current_url }}" hx-target="#content" hx-push-url="true" class="btn btn-sm btn-outline">Refresh</button>
+  </div>
+  <p class="text-sm opacity-70">{{ desc }} &middot; Data from GitHub API</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for repo in repos %}
+    <div class="card card-bordered bg-base-100 shadow-md">
+      <div class="card-body">
+        <div class="flex items-start justify-between">
+          <h3 class="card-title text-lg">
+            <a href="{{ repo.html_url }}" target="_blank" class="link link-primary">{{ repo.full_name }}</a>
+          </h3>
+          <div class="flex items-center gap-1 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            {{ repo.stargazers_count }}
+          </div>
+        </div>
+        {% if repo.description %}
+        <p class="text-sm">{{ repo.description }}</p>
+        {% endif %}
+        <div class="flex flex-wrap gap-2 mt-2">
+          {% if repo.language %}
+          <span class="badge badge-outline">{{ repo.language }}</span>
+          {% endif %}
+          {% for topic in repo.topics %}{% if loop.index <= 3 %}
+          <span class="badge badge-ghost">{{ topic }}</span>
+          {% endif %}{% endfor %}
+          <span class="text-xs opacity-50">{{ repo.forks_count }} forks</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

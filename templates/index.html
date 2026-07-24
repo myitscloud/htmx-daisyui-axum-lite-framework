@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Dashboard | HTMX Demo</title>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <link href="/static/output.css" rel="stylesheet">
+    <script>
+        var themes = ['light', 'dark', 'cupcake', 'retro'];
+
+        (function () {
+            var theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('theme-label').textContent = theme;
+        })();
+
+        function toggleTheme() {
+            var html = document.documentElement;
+            var current = html.getAttribute('data-theme');
+            var idx = themes.indexOf(current);
+            var next = themes[(idx + 1) % themes.length];
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            document.getElementById('theme-label').textContent = next;
+        }
+
+        function updateNav(path) {
+            document.querySelectorAll('.menu a').forEach(function (a) {
+                var href = a.getAttribute('href');
+                var isActive = href === path || (path === '/' && href === '/repos');
+                a.classList.toggle('active', isActive);
+            });
+            var parts = path.split('/').filter(Boolean);
+            var label = parts.length === 0 ? 'Home' : parts[parts.length - 1];
+            label = label.charAt(0).toUpperCase() + label.slice(1);
+            document.getElementById('page-title').textContent = label + ' | HTMX Demo';
+            document.getElementById('current-page').textContent = label;
+        }
+
+        document.addEventListener('htmx:afterOnLoad', function (e) {
+            var path = e.detail.pathInfo.finalPath;
+            updateNav(path);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateNav(location.pathname);
+        });
+
+
+    </script>
+</head>
+
+<body>
+    <div class="drawer lg:drawer-open">
+        <input id="drawer-toggle" type="checkbox" class="drawer-toggle" />
+
+        <div class="drawer-content flex flex-col min-h-screen">
+            <div class="navbar bg-base-200 shadow-sm">
+                <div class="flex-none lg:hidden">
+                    <label for="drawer-toggle" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </label>
+                </div>
+                <div class="flex-1">
+                    <a href="/" class="btn btn-ghost text-xl">HTMX Demo</a>
+                </div>
+                <div class="flex-none">
+                    <button onclick="toggleTheme()" class="btn btn-outline btn-sm capitalize">
+                        <span id="theme-label"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="breadcrumbs text-sm px-4 pt-2">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li id="current-page">Dashboard</li>
+                </ul>
+            </div>
+
+            <main id="content" class="flex-1 p-4">
+                {% if content %}
+                {{ content | safe }}
+                {% else %}
+                <div class="hero min-h-[40vh]">
+                    <div class="hero-content text-center">
+                        <div class="max-w-md">
+                            <h1 class="text-4xl font-bold">Welcome</h1>
+                            <p class="py-4">HTMX + Axum + DaisyUI Demo</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </main>
+
+            <footer class="footer footer-center bg-base-200 p-4 text-base-content">
+                <p>HTMX + Axum + DaisyUI Demo</p>
+            </footer>
+        </div>
+
+        <div class="drawer-side z-40">
+            <label for="drawer-toggle" class="drawer-overlay"></label>
+            <ul class="menu p-4 w-64 min-h-full bg-base-200 text-base-content">
+                <li class="menu-title"><span class="text-primary text-lg border-b border-base-300 pb-1 w-full block">GitHub Explorer</span></li>
+                <li><a href="/repos"         hx-get="/repos"         hx-target="#content" hx-push-url="true"><div><div>Search</div><div class="text-xs opacity-60">awesome-llm repos</div></div></a></li>
+                <li><a href="/repos/starred" hx-get="/repos/starred" hx-target="#content" hx-push-url="true"><div><div>Most Starred</div><div class="text-xs opacity-60">All-time top repos</div></div></a></li>
+                <li><a href="/repos/trending" hx-get="/repos/trending" hx-target="#content" hx-push-url="true"><div><div>Trending</div><div class="text-xs opacity-60">Trending this year</div></div></a></li>
+                <li><a href="/repos/forked"  hx-get="/repos/forked"  hx-target="#content" hx-push-url="true"><div><div>Most Forked</div><div class="text-xs opacity-60">Most forked repos</div></div></a></li>
+                <li class="menu-title"><span class="text-primary text-lg border-b border-base-300 pb-1 w-full block">Info</span></li>
+                <li><a href="/about"    hx-get="/about"    hx-target="#content" hx-push-url="true"><div><div>About</div><div class="text-xs opacity-60">About this demo</div></div></a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

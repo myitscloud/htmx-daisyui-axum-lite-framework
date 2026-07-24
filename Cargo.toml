@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 axum = "0.7.5"
 fake = { version = "2.9.2", features = ["dummy", "derive"] }
-handlebars = "5.1.2"
+tera = { version = "2", features = ["fast"] }
+reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0.203", features = ["serde_derive"] }
 serde_json = "1.0.117"
 tokio = { version = "1.38.0", features = ["full"] }

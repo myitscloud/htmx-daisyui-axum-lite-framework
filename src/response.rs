@@ -10,6 +10,11 @@ use serde_json::{json, Value};
 
 use crate::ExtAppState;
 
+fn render(tera: &tera::Tera, template: &str, data: &Value) -> String {
+    let ctx = tera::Context::from_serialize(data).unwrap();
+    tera.render(template, &ctx).unwrap()
+}
+
 #[derive(Debug, Clone)]
 pub struct HxResponse {
     data: Value,
@@ -59,13 +64,10 @@ pub async fn response_middleware(request: Request<Body>, next: Next) -> Response
         return match accept.as_deref() {
             Some(b"application/json") => Json(hx_response.data.clone()).into_response(),
             _ => {
-                let mut html = state
-                    .h
-                    .render(&hx_response.template, &hx_response.data)
-                    .unwrap(); // ignoring template rendering errors
+                let mut html = render(&state.h, &hx_response.template, &hx_response.data);
 
                 if !is_htmx_request && hx_response.template != "index" {
-                    html = state.h.render("index", &json!({"content": html})).unwrap();
+                    html = render(&state.h, "index", &json!({"content": html}));
                 }
 
                 Html(html).into_response()
@@ -73,5 +75,5 @@ pub async fn response_middleware(request: Request<Body>, next: Next) -> Response
         };
     }
 
-    return response;
+    response
 }
